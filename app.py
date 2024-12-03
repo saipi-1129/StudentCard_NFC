@@ -29,19 +29,16 @@ def on_connect(tag: nfc.tag.Tag) -> bool:
     
 
     try:
-        # 生データを読み込む
         data = tag.dump()
         #print("\n".join(data))  
-        remove_log()# 修正: tag.dump() を data で表示
+        remove_log()
         with open("log.txt", "a") as f:
             f.write("\n".join(data) + "\n") 
-            # 修正: データをログに書き込む際に改行を追加
-        extract_value_from_line(5, 2, 10)  # 5行目の0列目から5列目を取得
+        extract_value_from_line(5, 2, 10)  
     except nfc.tag.tt3.Type3TagCommandError as e:
-        print(f"Error: {e}")  # タイムアウトエラーをキャッチして表示
+        print(f"Error: {e}") 
     except Exception as e:
         print(f"Unexpected error: {e}") 
-    # その他のエラーをキャッチして表示
 
     return True  # Trueを返しておくとタグが存在しなくなるまで待機され、離すとon_releaseが発火する
 
@@ -52,17 +49,11 @@ def on_release(tag: nfc.tag.Tag) -> None:
 def extract_value_from_line(line_number, start_col, end_col):
     with open("log.txt", 'r') as file:
         lines = file.readlines()
-        
-        # 行数を確認
 
-        
-        target_line = lines[line_number - 1]  # 行番号は1から始まるため、-1する
+        target_line = lines[line_number - 1]  
         columns = target_line.split()  # スペースで分割
-        
-        # 指定された列範囲が有効か確認
 
-        
-        # 指定された列範囲の値を取得
+
         extracted_values = columns[start_col:end_col + 1]
         decoded_values = [chr(int(value, 16)) for value in extracted_values[1:]]  # 最初の要素（インデックス）を除外
         students_id = ''.join(decoded_values)  # デコードした文字を結合
@@ -90,7 +81,6 @@ if os.path.exists("log.txt"):
     remove_log()
 else:
     with open("log.txt", 'w') as file:
-        # ファイルに書き込む内容
         file.write('')
         
 
