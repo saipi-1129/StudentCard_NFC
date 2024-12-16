@@ -2,7 +2,7 @@
 import nfc
 import os
 from datetime import datetime
-#from playsound import playsound
+#from playsound import playsound　
 
 
 print("""\033[31m
@@ -15,8 +15,7 @@ print("""\033[31m
                                                                                                                             
 
 \033[0m""")
-print("/////////////////////////////////////////////////////////////////////////")
-
+print("waiting...")
 
 def remove_log():
     os.remove("log.txt")
@@ -24,9 +23,7 @@ def remove_log():
         file.write('')
 
 def on_connect(tag: nfc.tag.Tag) -> bool:
-    
     print("connected")
-    
 
     try:
         data = tag.dump()
@@ -39,31 +36,29 @@ def on_connect(tag: nfc.tag.Tag) -> bool:
         print(f"Error: {e}") 
     except Exception as e:
         print(f"Unexpected error: {e}") 
-
     return True  # Trueを返しておくとタグが存在しなくなるまで待機され、離すとon_releaseが発火する
 
 def on_release(tag: nfc.tag.Tag) -> None:
     print("released")
     print("/////////////////////////////////////////////////////////////////////////")
-    
-def extract_value_from_line(line_number, start_col, end_col):
-    with open("log.txt", 'r') as file:
+
+def extract_value_from_line(line_number, start_col, end_col) -> any:
+    with open("log.txt", 'r') as file:#logに中身を書き込む
         lines = file.readlines()
-
         target_line = lines[line_number - 1]  
-        columns = target_line.split()  # スペースで分割
-
-
+        columns = target_line.split()
         extracted_values = columns[start_col:end_col + 1]
-        decoded_values = [chr(int(value, 16)) for value in extracted_values[1:]]  # 最初の要素（インデックス）を除外
-        students_id = ''.join(decoded_values)  # デコードした文字を結合
+        decoded_values = [chr(int(value, 16)) for value in extracted_values[1:]]  # 学籍番号だけとれればいいけんね～^^
+        students_id = ''.join(decoded_values)  
         print(f"student_id: {students_id}")
         with open("students_id.txt", "a") as f:
                 f.write(f"{datetime.now()} / {students_id}\n")
+        
+        #タッチ音
         #playsound("sounds/iD.wav")
         
         students_id_str = str(students_id)
-        grade =students_id_str[2] + students_id_str[3]
+        grade =students_id_str[2:4]#学年
         if int(grade) == 24:
             print("1年生")
         elif int(grade) == 23:
@@ -75,15 +70,11 @@ def extract_value_from_line(line_number, start_col, end_col):
         else:
             print("留年で草")
 
-
-
 if os.path.exists("log.txt"):
     remove_log()
 else:
     with open("log.txt", 'w') as file:
         file.write('')
-        
-
 
 with nfc.ContactlessFrontend("usb") as clf:
     while True:
